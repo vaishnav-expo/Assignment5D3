@@ -73,7 +73,7 @@
             //Heading
             svg.append("text")
                 .attr("x", (width / 2))
-                .attr("y", (margin.top / 2) - 200)
+                .attr("y", (margin.top / 2) - 180)
                 .attr("text-anchor", "middle")
                 .style("font-size", "20px")
                 .text("Heat Map of total minutes delayed due to weather");
@@ -124,7 +124,7 @@
 
             svg.append("defs")
                 .append("linearGradient")
-                .attr("id", "legend-traffic")
+                .attr("id", "legend-delay")
                 .attr("x1", "0%").attr("y1", "0%")
                 .attr("x2", "100%").attr("y2", "0%")
                 .selectAll("stop")
@@ -152,14 +152,14 @@
                 .attr("y", -100)
                 .attr("width", legendWidth)
                 .attr("height", 10)
-                .style("fill", "url(#legend-traffic)");
+                .style("fill", "url(#legend-delay)");
 
             legendsvg.append("text")
                 .attr("class", "legendTitle")
                 .attr("x", -10)
                 .attr("y", -120)
                 .style("text-anchor", "middle")
-                .text("Number of Accidents");
+                .text("Number of Minutes delayed due to weather");
 
             var xScale1 = d3.scaleLinear()
                 .range([-legendWidth/2, legendWidth/2])
