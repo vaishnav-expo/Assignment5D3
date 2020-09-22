@@ -1,4 +1,5 @@
 <!--http://using-d3js.com/04_05_sequential_scales.html-->
+<!--http://bl.ocks.org/nbremer/62cf60e116ae821c06602793d265eaf6-->
 
 <!DOCTYPE html>
 <html lang="en">
@@ -12,7 +13,7 @@
 
 <svg width="200" height="400"></svg>
 <script>
-    var margin = {top: 80, right: 20, bottom: 40, left: 90},
+    var margin = {top: 150, right: 20, bottom: 20, left: 100},
         width = 1000 - margin.left - margin.right,
         height = 600 - margin.top - margin.bottom;
 
@@ -72,7 +73,7 @@
             //Heading
             svg.append("text")
                 .attr("x", (width / 2))
-                .attr("y", 0 - (margin.top / 2))
+                .attr("y", (margin.top / 2) - 200)
                 .attr("text-anchor", "middle")
                 .style("font-size", "20px")
                 .text("Heat Map of total minutes delayed due to weather");
@@ -103,12 +104,78 @@
                 .call(d3.axisLeft(yScale).tickSize(0))
                 .select(".domain").remove();
 
+            //Scale for different colour for different values
             var colorScale = d3.scaleSequential()
                 .interpolator(d3.interpolateRgb("purple", "orange"))
                 .domain([0,maxVal]);
 
+            //creating gradient legend
+            var countScale = d3.scaleLinear()
+                .domain([0, maxVal])
+                .range([0, width])
 
-            //Adding the squares
+            var numStops = 10;
+            countRange = countScale.domain();
+            countRange[2] = countRange[1] - countRange[0];
+            countPoint = [];
+            for(var i = 0; i < numStops; i++) {
+                countPoint.push(i * countRange[2]/(numStops-1) + countRange[0]);
+            }
+
+            svg.append("defs")
+                .append("linearGradient")
+                .attr("id", "legend-traffic")
+                .attr("x1", "0%").attr("y1", "0%")
+                .attr("x2", "100%").attr("y2", "0%")
+                .selectAll("stop")
+                .data(d3.range(numStops))
+                .enter().append("stop")
+                .attr("offset", function(d,i) {
+                    return countScale( countPoint[i] )/width;
+                })
+                .attr("stop-color", function(d,i) {
+                    return colorScale( countPoint[i] );
+                });
+
+
+            var legendWidth = Math.min(width*0.8, 400);
+
+            //drawing the gradient legend
+            var legendsvg = svg.append("g")
+                .attr("class", "legendWrapper")
+                .attr("transform", "translate(" + (width/2) + "," + (70) + ")");
+
+
+            legendsvg.append("rect")
+                .attr("class", "legendRect")
+                .attr("x", -legendWidth/2)
+                .attr("y", -100)
+                .attr("width", legendWidth)
+                .attr("height", 10)
+                .style("fill", "url(#legend-traffic)");
+
+            legendsvg.append("text")
+                .attr("class", "legendTitle")
+                .attr("x", -10)
+                .attr("y", -120)
+                .style("text-anchor", "middle")
+                .text("Number of Accidents");
+
+            var xScale1 = d3.scaleLinear()
+                .range([-legendWidth/2, legendWidth/2])
+                .domain([ 0,maxVal] );
+
+            var xAxis = d3.axisBottom()
+                .ticks(5)
+                .scale(xScale1);
+
+            legendsvg.append("g")
+                .attr("class", "axis")
+                .attr("transform", "translate(0 , "+ (-90) + ")")
+                .call(xAxis);
+
+
+            //Adding the squares with colour
             svg.selectAll()
                 .data(finalData)
                 .enter()
